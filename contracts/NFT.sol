@@ -15,7 +15,7 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
     uint256 public maxSupply = 1000;
     uint256 public maxMintAmount = 20;
     bool public paused = false;
-    mapping(address => bool) public whitelisted;
+    mapping(address => uint256) userRefund;
 
     constructor(
         string memory _name,
@@ -64,10 +64,14 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         require(!paused);
         require(_mintAmount > 0);
         require(_mintAmount <= maxMintAmount);
-        require(supply + _mintAmount <= maxSupply);
+        // require(supply + _mintAmount <= maxSupply);
 
-        for (uint256 i = 1; i <= _mintAmount; i++) {
-            _safeMint(buyer, supply + i);
+        if (supply + _mintAmount <= maxSupply) {
+            for (uint256 i = 1; i <= _mintAmount; i++) {
+                _safeMint(buyer, supply + i);
+            }
+        } else {
+            userRefund[buyer] += _mintAmount;
         }
     }
 
