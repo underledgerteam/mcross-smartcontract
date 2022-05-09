@@ -12,7 +12,7 @@ contract MintNFTCrossChain is Ownable {
     string destinationAddress;
     string destinationChain;
     address tokenAddress;
-    uint256 costNFT = 0.002 ether;
+    uint256 costNFT = 0.022 ether;
     address axelarGatewayAddress;
     address gasReceiverAddress;
 

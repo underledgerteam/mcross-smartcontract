@@ -15,7 +15,7 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
     uint256 public maxSupply = 1000;
     uint256 public maxMintAmount = 20;
     bool public paused = false;
-    mapping(address => uint256) userRefund;
+    mapping(address => uint256) private userRefund;
 
     constructor(
         string memory _name,
@@ -34,10 +34,12 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
     // public
     function mint(uint256 _mintAmount) public payable {
         uint256 supply = totalSupply();
-        require(!paused);
-        require(_mintAmount > 0);
-        require(_mintAmount <= maxMintAmount);
-        require(supply + _mintAmount <= maxSupply);
+        if (
+            _mintAmount <= 1 &&
+            _mintAmount <= maxMintAmount &&
+            supply + _mintAmount <= maxSupply &&
+            !paused
+        ) revert NumberToSmall(_mintAmount);
 
         if (msg.sender != owner()) {
             require(msg.value >= cost * _mintAmount);
@@ -64,15 +66,20 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         require(!paused);
         require(_mintAmount > 0);
         require(_mintAmount <= maxMintAmount);
-        // require(supply + _mintAmount <= maxSupply);
 
         if (supply + _mintAmount <= maxSupply) {
             for (uint256 i = 1; i <= _mintAmount; i++) {
                 _safeMint(buyer, supply + i);
             }
         } else {
-            userRefund[buyer] += _mintAmount;
+            userRefund[buyer] += amount;
         }
+    }
+
+    function usercanRefund() external {
+        require(userRefund[msg.sender] > 0);
+        payable(msg.sender).transfer(userRefund[msg.sender]);
+        userRefund[msg.sender] = 0;
     }
 
     function walletOfOwner(address _owner)
