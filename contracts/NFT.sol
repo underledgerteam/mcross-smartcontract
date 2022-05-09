@@ -76,6 +76,14 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         }
     }
 
+    function checkAmountRefund(address _userAddress)
+        public
+        view
+        returns (uint256 amount)
+    {
+        return userRefund[_userAddress];
+    }
+
     function usercanRefund() external {
         require(userRefund[msg.sender] > 0);
         payable(msg.sender).transfer(userRefund[msg.sender]);
