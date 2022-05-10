@@ -73,6 +73,15 @@ contract NftLinker is ERC721, IAxelarExecutable {
             originalTokenId,
             destinationAddress
         );
+
+        gasReceiver.payNativeGasForContractCall{value: msg.value}(
+            address(this),
+            destinationChain,
+            linkers[destinationChain],
+            payload,
+            msg.sender
+        );
+
         gateway.callContract(
             destinationChain,
             linkers[destinationChain],
