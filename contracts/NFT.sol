@@ -3,6 +3,7 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import {IAxelarExecutable} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarExecutable.sol";
 
@@ -11,11 +12,14 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
 
     string public baseURI;
     string public baseExtension = ".json";
-    uint256 public cost = 0.002 ether;
+    uint256 public cost = 0.02 ether;
     uint256 public maxSupply = 1000;
-    uint256 public maxMintAmount = 20;
+    uint256 public maxMintAmount = 3;
     bool public paused = false;
+    address wethAddress = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
     mapping(address => uint256) private userRefund;
+    uint256 balanceWETH;
+    address Owner;
 
     constructor(
         string memory _name,
@@ -24,6 +28,7 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         address gateway
     ) ERC721(_name, _symbol) IAxelarExecutable(gateway) {
         setBaseURI(_initBaseURI);
+        Owner = msg.sender;
     }
 
     // internal
@@ -34,12 +39,10 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
     // public
     function mint(uint256 _mintAmount) public payable {
         uint256 supply = totalSupply();
-        if (
-            _mintAmount <= 1 &&
-            _mintAmount <= maxMintAmount &&
-            supply + _mintAmount <= maxSupply &&
-            !paused
-        ) revert NumberToSmall(_mintAmount);
+        require(!paused);
+        require(_mintAmount > 0);
+        require(_mintAmount <= maxMintAmount);
+        require(supply + _mintAmount <= maxSupply);
 
         if (msg.sender != owner()) {
             require(msg.value >= cost * _mintAmount);
@@ -51,37 +54,28 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
     }
 
     function _executeWithToken(
-        string memory sourceChain,
-        string memory sourceAddress,
+        string memory,
+        string memory,
         bytes calldata payload,
-        string memory tokenSymbol,
+        string memory,
         uint256 amount
     ) internal virtual override {
         address buyer;
         uint256 _mintAmount;
 
         (buyer, _mintAmount) = abi.decode(payload, (address, uint256));
-
         uint256 supply = totalSupply();
+
         require(!paused);
-        require(_mintAmount > 0);
-        require(_mintAmount <= maxMintAmount);
 
         if (supply + _mintAmount <= maxSupply) {
+            balanceWETH += amount;
             for (uint256 i = 1; i <= _mintAmount; i++) {
                 _safeMint(buyer, supply + i);
             }
         } else {
             userRefund[buyer] += amount;
         }
-    }
-
-    function checkAmountRefund(address _userAddress)
-        public
-        view
-        returns (uint256 amount)
-    {
-        return userRefund[_userAddress];
     }
 
     function usercanRefund() external {
@@ -152,7 +146,15 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         paused = _state;
     }
 
-    function withdraw() public payable onlyOwner {
+    function withdraw() external payable onlyOwner {
         require(payable(msg.sender).send(address(this).balance));
+    }
+
+    function setWETHAddress(address _newAddress) external onlyOwner {
+        wethAddress = _newAddress;
+    }
+
+    function withdrawWETH() external onlyOwner {
+        IERC20(wethAddress).transfer(Owner, balanceWETH);
     }
 }

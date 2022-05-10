@@ -15,6 +15,7 @@ contract MintNFTCrossChain is Ownable {
     uint256 costNFT = 0.022 ether;
     address axelarGatewayAddress;
     address gasReceiverAddress;
+    uint256 public maxMintAmount = 3;
 
     constructor(
         address _gateway,
@@ -47,11 +48,14 @@ contract MintNFTCrossChain is Ownable {
     function mint(uint256 _mintAmount) public payable {
         uint256 total = _mintAmount * costNFT;
 
+        require(IERC20.balanceOf(msg.sender) >= total);
+        require(_mintAmount <= maxMintAmount);
+        require(msg.sender != owner());
+        require(_mintAmount > 0);
+
         IERC20(tokenAddress).transferFrom(msg.sender, address(this), total);
         IERC20(tokenAddress).approve(axelarGatewayAddress, total);
         IERC20(tokenAddress).approve(gasReceiverAddress, total);
-
-        require(IERC20.balanceOf(msg.sender >= total));
 
         bytes memory payload = abi.encode(msg.sender, _mintAmount);
 
