@@ -3,18 +3,19 @@
 pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IAxelarGateway} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarGateway.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import {IAxelarExecutable} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarExecutable.sol";
 import {IAxelarGasReceiver} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarGasReceiver.sol";
 
 contract NftLinker is ERC721, IAxelarExecutable {
     using Strings for uint256;
     mapping(uint256 => bytes) public original;
     mapping(string => string) public linkers;
-    IAxelarGasReceiver gasReceiver;
 
     string baseURI;
     string chainName;
     string public baseExtension = ".json";
+    IAxelarGasReceiver gasReceiver;
 
     function addLinker(string memory chain, string memory linker) external {
         linkers[chain] = linker;

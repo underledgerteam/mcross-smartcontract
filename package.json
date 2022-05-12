@@ -10,6 +10,9 @@
   },
   "dependencies": {
     "@axelar-network/axelar-local-dev": "github:axelarnetwork/axelar-local-dev",
-    "@openzeppelin/contracts": "^4.6.0"
+    "@openzeppelin/contracts": "^4.6.0",
+    "do": "^0.6.2",
+    "dotenv": "^16.0.1",
+    "hardhat-abi-exporter": "^2.9.0"
   }
 }

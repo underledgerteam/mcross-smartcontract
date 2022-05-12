@@ -10,19 +10,17 @@ contract MintNFTCrossChain is Ownable {
     IAxelarGateway axelarGateway;
     IAxelarGasReceiver gasReceiver;
     string destinationAddress;
-    string destinationChain;
+    string destinationChain = "Polygon";
     address tokenAddress;
-    uint256 costNFT = 0.022 ether;
+    uint256 costNFT = 0.002 ether;
     address axelarGatewayAddress;
     address gasReceiverAddress;
-    uint256 public maxMintAmount = 3;
 
     constructor(
         address _gateway,
         address _gasReceiver,
         address _tokenAddress,
-        address _destinationAddress,
-        string memory _destinationChain
+        string memory _destinationAddress
     ) {
         axelarGateway = IAxelarGateway(_gateway);
         gasReceiver = IAxelarGasReceiver(_gasReceiver);
@@ -30,10 +28,13 @@ contract MintNFTCrossChain is Ownable {
         axelarGatewayAddress = _gateway;
         gasReceiverAddress = _gasReceiver;
         destinationAddress = _destinationAddress;
-        destinationChain = _destinationChain;
+        // destinationChain = _destinationChain;
     }
 
-    function setDestinationAddress(address _newAddress) external onlyOwner {
+    function setDestinationAddress(string memory _newAddress)
+        external
+        onlyOwner
+    {
         destinationAddress = _newAddress;
     }
 
@@ -45,13 +46,10 @@ contract MintNFTCrossChain is Ownable {
         costNFT = _newCost;
     }
 
-    function mint(uint256 _mintAmount) public payable {
+    function mint(uint256 _mintAmount) external payable {
         uint256 total = _mintAmount * costNFT;
 
-        require(IERC20.balanceOf(msg.sender) >= total);
-        require(_mintAmount <= maxMintAmount);
-        require(msg.sender != owner());
-        require(_mintAmount > 0);
+        require(IERC20(tokenAddress).balanceOf(msg.sender) >= total);
 
         IERC20(tokenAddress).transferFrom(msg.sender, address(this), total);
         IERC20(tokenAddress).approve(axelarGatewayAddress, total);
