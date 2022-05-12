@@ -10,7 +10,7 @@ contract MintNFTCrossChain is Ownable {
     IAxelarGateway axelarGateway;
     IAxelarGasReceiver gasReceiver;
     string destinationAddress;
-    string destinationChain = "Polygon";
+    string destinationChain;
     address tokenAddress;
     uint256 costNFT = 0.002 ether;
     address axelarGatewayAddress;
@@ -20,7 +20,8 @@ contract MintNFTCrossChain is Ownable {
         address _gateway,
         address _gasReceiver,
         address _tokenAddress,
-        string memory _destinationAddress
+        string memory _destinationAddress,
+        string memory _destinationChain
     ) {
         axelarGateway = IAxelarGateway(_gateway);
         gasReceiver = IAxelarGasReceiver(_gasReceiver);
@@ -28,7 +29,7 @@ contract MintNFTCrossChain is Ownable {
         axelarGatewayAddress = _gateway;
         gasReceiverAddress = _gasReceiver;
         destinationAddress = _destinationAddress;
-        // destinationChain = _destinationChain;
+        destinationChain = _destinationChain;
     }
 
     function setDestinationAddress(string memory _newAddress)
