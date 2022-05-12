@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.9;
 
@@ -146,8 +146,8 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         paused = _state;
     }
 
-    function withdraw() external payable onlyOwner {
-        require(payable(msg.sender).send(address(this).balance));
+    function withdraw() external onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     function setWETHAddress(address _newAddress) external onlyOwner {
