@@ -15,9 +15,6 @@ contract MCrossMarketplace is Ownable {
     uint256 private itemCount = 0;
     address public nftContract;
 
-    // List of all market items 
-	uint256[] private marketitems;
-
     struct MarketItem {
         address nftContract;
         uint256 tokenId;
@@ -26,6 +23,9 @@ contract MCrossMarketplace is Ownable {
         ListingStatus status;
     }
 
+    // List of all market items 
+	uint256[] private marketitems;
+    // Mapping between token id and their struct
     mapping(uint256 => MarketItem) private tokenIdMarketItems;
 
     event List(
@@ -58,10 +58,6 @@ contract MCrossMarketplace is Ownable {
         nftContract = _newNFTContract;
     }
 
-    function getItemCounts() public view returns(uint256) {
-        return itemCount;
-    }
-
     function listItems(uint _tokenId, uint256 price) external {
         require(price > 0, "price must be at least 1 wei");
         require(_tokenId > 0, "token id must greater than 0");
@@ -88,7 +84,7 @@ contract MCrossMarketplace is Ownable {
         emit List(item.nftContract, _tokenId, msg.sender, price, item.status);
     }
 
-    function getMarketItems() external view returns(MarketItem[] memory){
+    function getAllMarketItems() external view returns(MarketItem[] memory){
         MarketItem[] memory  items = new MarketItem[](itemCount);
 
         for(uint256 i = 0; i < marketitems.length; i++) {
