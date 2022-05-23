@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IAxelarExecutable} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarExecutable.sol";
 import {IAxelarGasReceiver} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarGasReceiver.sol";
 
-contract NftLinker is ERC721, IAxelarExecutable {
+contract NftLinker is ERC721Enumerable, IAxelarExecutable, Ownable {
     using Strings for uint256;
     mapping(uint256 => bytes) public original;
     mapping(string => string) public linkers;
@@ -51,15 +51,22 @@ contract NftLinker is ERC721, IAxelarExecutable {
     function sendNFT(
         uint256 tokenId,
         string memory destinationChain,
-        address destinationAddress
+        address destinationAddress,
+        uint256 amountFree
     ) external payable {
-        _sendMintedToken(tokenId, destinationChain, destinationAddress);
+        _sendMintedToken(
+            tokenId,
+            destinationChain,
+            destinationAddress,
+            amountFree
+        );
     }
 
     function _sendMintedToken(
         uint256 tokenId,
         string memory destinationChain,
-        address destinationAddress
+        address destinationAddress,
+        uint256 amoutFree
     ) internal {
         _burn(tokenId);
         string memory originalChain;
@@ -76,7 +83,10 @@ contract NftLinker is ERC721, IAxelarExecutable {
             destinationAddress,
             msg.sender
         );
-        gasReceiver.payNativeGasForContractCall{value: msg.value}(
+
+        uint256 totalNet = msg.value - amoutFree;
+
+        gasReceiver.payNativeGasForContractCall{value: totalNet}(
             address(this),
             destinationChain,
             linkers[destinationChain],
@@ -98,6 +108,10 @@ contract NftLinker is ERC721, IAxelarExecutable {
             destinationAddress,
             block.timestamp
         );
+    }
+
+    function withdraw() external onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     function setBaseURI(string memory _newBaseURI) public {
@@ -165,5 +179,18 @@ contract NftLinker is ERC721, IAxelarExecutable {
         _safeMint(destinationAddress, newTokenId);
 
         emit ReceiveNFT(sourceChain, tokenId, senderAddress, block.timestamp);
+    }
+
+    function walletOfOwner(address _owner)
+        public
+        view
+        returns (uint256[] memory)
+    {
+        uint256 ownerTokenCount = balanceOf(_owner);
+        uint256[] memory tokenIds = new uint256[](ownerTokenCount);
+        for (uint256 i; i < ownerTokenCount; i++) {
+            tokenIds[i] = tokenOfOwnerByIndex(_owner, i);
+        }
+        return tokenIds;
     }
 }
