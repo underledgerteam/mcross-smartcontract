@@ -3,9 +3,10 @@
 pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import {IAxelarExecutable} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarExecutable.sol";
 import {IAxelarGasReceiver} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarGasReceiver.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract NftLinker is ERC721Enumerable, IAxelarExecutable, Ownable {
     using Strings for uint256;

@@ -46,6 +46,9 @@ module.exports = {
     artifacts: "./artifacts",
   },
   mocha: {
-    timeout: 40000,
+    timeout: 400000,
+  },
+  gasReporter: {
+    enabled: false,
   },
 };
