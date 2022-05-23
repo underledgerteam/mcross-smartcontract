@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {IAxelarExecutable} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarExecutable.sol";
 import {IAxelarGasReceiver} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarGasReceiver.sol";
 
-contract ConverseNFTETH is IAxelarExecutable {
+contract ConverseNFTETH is IAxelarExecutable, Ownable {
     using Strings for uint256;
     mapping(string => string) public linkers;
     IAxelarGasReceiver gasReceiver;
@@ -47,23 +47,32 @@ contract ConverseNFTETH is IAxelarExecutable {
         address operator,
         uint256 tokenId,
         string memory destinationChain,
-        address destinationAddress
+        address destinationAddress,
+        uint256 amountFree
     ) external payable {
         IERC721(operator).transferFrom(msg.sender, address(this), tokenId);
         _sendNativeToken(
             operator,
             tokenId,
             destinationChain,
-            destinationAddress
+            destinationAddress,
+            amountFree
         );
+    }
+
+    function withdraw() external onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
     }
 
     function _sendNativeToken(
         address operator,
         uint256 tokenId,
         string memory destinationChain,
-        address destinationAddress
+        address destinationAddress,
+        uint256 amoutFree
     ) internal {
+        uint256 totalNet = msg.value - amoutFree;
+
         bytes memory payload = abi.encode(
             chainName,
             operator,
@@ -72,7 +81,7 @@ contract ConverseNFTETH is IAxelarExecutable {
             msg.sender
         );
 
-        gasReceiver.payNativeGasForContractCall{value: msg.value}(
+        gasReceiver.payNativeGasForContractCall{value: totalNet}(
             address(this),
             destinationChain,
             linkers[destinationChain],

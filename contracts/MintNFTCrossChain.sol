@@ -7,13 +7,15 @@ import {IAxelarGateway} from "@axelar-network/axelar-cgp-solidity/src/interfaces
 import {IAxelarGasReceiver} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarGasReceiver.sol";
 
 contract MintNFTCrossChain is Ownable {
+    using Strings for uint256;
+
     IAxelarGateway axelarGateway;
     IAxelarGasReceiver gasReceiver;
-    string destinationAddress;
-    string destinationChain;
-    address tokenAddress;
-    uint256 costNFT = 0.002 ether;
-    address axelarGatewayAddress;
+    string public destinationAddress;
+    string public destinationChain;
+    address public tokenAddress;
+    uint256 public costNFT = 0.022 ether;
+    address public axelarGatewayAddress;
     address gasReceiverAddress;
 
     constructor(
@@ -32,6 +34,14 @@ contract MintNFTCrossChain is Ownable {
         destinationChain = _destinationChain;
     }
 
+    event MintEvent(
+        string name,
+        uint256 amount,
+        address from,
+        address to,
+        uint256 timestamp
+    );
+
     function setDestinationAddress(string memory _newAddress)
         external
         onlyOwner
@@ -41,6 +51,10 @@ contract MintNFTCrossChain is Ownable {
 
     function setDestinationChain(string memory _newChain) external onlyOwner {
         destinationChain = _newChain;
+    }
+
+    function setTokenAddress(address _newAddress) external onlyOwner {
+        tokenAddress = _newAddress;
     }
 
     function setCostNFT(uint256 _newCost) external onlyOwner {
@@ -74,6 +88,16 @@ contract MintNFTCrossChain is Ownable {
             payload,
             "WETH",
             total
+        );
+
+        emit MintEvent(
+            string(
+                abi.encodePacked("Mint", " ", _mintAmount.toString(), " " "NFT")
+            ),
+            costNFT * _mintAmount,
+            msg.sender,
+            address(this),
+            block.timestamp
         );
     }
 }
