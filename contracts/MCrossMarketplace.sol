@@ -12,8 +12,12 @@ contract MCrossMarketplace is Ownable {
 		Cancelled
 	}
 
+    address private nftContract;
+    address private creatorWallet;
+
     uint256 private itemCount = 0;
-    address public nftContract;
+    uint256 private rateServiceFee = 3;
+    uint256 private rateCreatorFee = 10;
 
     struct MarketItem {
         address nftContract;
@@ -50,12 +54,20 @@ contract MCrossMarketplace is Ownable {
         address owner
     );
 
-    constructor(address _nftContract) {
+    constructor(
+        address _nftContract,
+        address _creatorWallet
+    ){
         nftContract = _nftContract;
+        creatorWallet = _creatorWallet;
     }
 
     function setNftContract(address _newNFTContract) external onlyOwner {
         nftContract = _newNFTContract;
+    }
+
+    function setCreatorWallet(address _creatorWallet) external onlyOwner {
+        creatorWallet = _creatorWallet;
     }
 
     function listItems(uint _tokenId, uint256 price) external {
@@ -96,7 +108,6 @@ contract MCrossMarketplace is Ownable {
     }
 
     function getMyMarketplace(address _owner) external view returns(MarketItem[] memory) {
-        require(msg.sender == _owner, "only owner can get my marketplace item");
         MarketItem[] memory items = new MarketItem[](itemCount);
 
         for(uint i = 0; i < marketitems.length; i++) {
@@ -126,6 +137,13 @@ contract MCrossMarketplace is Ownable {
         emit Cancel (_tokenId, item.owner);
     }
 
+    function calculateItemFee(uint256 price) private view returns(uint256, uint256) {
+        uint256 serviceFee = price * rateServiceFee / 100;
+        uint256 creatorFee = (price - serviceFee) * rateCreatorFee / 100;
+        uint256 sellerRecieve = price - serviceFee - creatorFee;
+        return (creatorFee, sellerRecieve);
+    }
+
     function buyMarketItem(uint _tokenId) external payable {
         require(tokenIdMarketItems[_tokenId].tokenId > 0, "item not exists");
         MarketItem storage item = tokenIdMarketItems[_tokenId];
@@ -137,7 +155,11 @@ contract MCrossMarketplace is Ownable {
         tokenIdMarketItems[_tokenId].status = ListingStatus.Sold;
 
         IERC721(nftContract).transferFrom(address(this), msg.sender, item.tokenId);
-        payable(item.owner).transfer(item.price);
+
+        (uint256 creatorFee, uint256 sellerRecieve) = calculateItemFee(item.price);
+
+        payable(creatorWallet).transfer(creatorFee);
+        payable(item.owner).transfer(sellerRecieve);
 
         emit Sale(
             item.nftContract,
@@ -147,5 +169,9 @@ contract MCrossMarketplace is Ownable {
             item.price,
             item.status
         );
+    }
+
+    function withdraw() external onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
     }
 }
