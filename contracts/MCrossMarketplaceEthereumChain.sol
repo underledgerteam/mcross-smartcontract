@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-contract MCrossMarketplace is Ownable {
+contract MCrossMarketplaceETH is Ownable {
     enum ListingStatus {
 		Active,
 		Sold,
@@ -59,14 +59,6 @@ contract MCrossMarketplace is Ownable {
         address _creatorWallet
     ){
         nftContract = _nftContract;
-        creatorWallet = _creatorWallet;
-    }
-
-    function setNftContract(address _newNFTContract) external onlyOwner {
-        nftContract = _newNFTContract;
-    }
-
-    function setCreatorWallet(address _creatorWallet) external onlyOwner {
         creatorWallet = _creatorWallet;
     }
 
@@ -137,7 +129,7 @@ contract MCrossMarketplace is Ownable {
         emit Cancel (_tokenId, item.owner);
     }
 
-    function calculateItemFee(uint256 price) private view returns(uint256, uint256) {
+    function calculateItemFee(uint256 price) public view returns(uint256, uint256) {
         uint256 serviceFee = price * rateServiceFee / 100;
         uint256 creatorFee = (price - serviceFee) * rateCreatorFee / 100;
         uint256 sellerRecieve = price - serviceFee - creatorFee;
@@ -150,9 +142,7 @@ contract MCrossMarketplace is Ownable {
 
         require(msg.sender != item.owner, "buy own item not allow");
         require(item.status == ListingStatus.Active, "item status is not active");
-        require(msg.value == item.price, "invalid price");
-
-        tokenIdMarketItems[_tokenId].status = ListingStatus.Sold;
+        require(msg.value == item.price, "Invalid price");
 
         IERC721(nftContract).transferFrom(address(this), msg.sender, item.tokenId);
 
@@ -160,6 +150,9 @@ contract MCrossMarketplace is Ownable {
 
         payable(creatorWallet).transfer(creatorFee);
         payable(item.owner).transfer(sellerRecieve);
+
+        tokenIdMarketItems[_tokenId].status = ListingStatus.Sold;
+        tokenIdMarketItems[_tokenId].owner = item.owner;
 
         emit Sale(
             item.nftContract,
@@ -173,5 +166,32 @@ contract MCrossMarketplace is Ownable {
 
     function withdraw() external onlyOwner {
         payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function bulkTransferERC721() external onlyOwner {
+        for(uint256 i = 0; i < marketitems.length; i++) {
+            uint256 _tokenId = marketitems[i];
+            
+            MarketItem memory item = tokenIdMarketItems[_tokenId];
+
+            tokenIdMarketItems[_tokenId].status = ListingStatus.Cancelled;
+            IERC721(nftContract).safeTransferFrom(address(this), item.owner, _tokenId);
+        }
+    }
+
+    function setNftContract(address _newNFTContract) external onlyOwner {
+        nftContract = _newNFTContract;
+    }
+
+    function getNftContract() external onlyOwner view returns(address) {
+        return nftContract;
+    }
+
+    function setCreatorWallet(address _creatorWallet) external onlyOwner {
+        creatorWallet = _creatorWallet;
+    }
+
+    function getCreatorWallet() external onlyOwner view returns(address) {
+        return creatorWallet;
     }
 }
