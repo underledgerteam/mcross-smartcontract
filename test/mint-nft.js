@@ -1,16 +1,16 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 
-describe("MCOSS COLLECTION", () => {
+describe("MINT NFT", () => {
   let MCOSSContract;
   let owner;
   beforeEach(async () => {
     const MCrossCollection = await ethers.getContractFactory(
       "MCrossCollection"
     );
-    [owner] = await ethers.getSigners();
+    [owner, test] = await ethers.getSigners();
     MCOSSContract = await MCrossCollection.deploy(
-      "MCOSS COLLECTION",
+      "MCROSS COLLECTION",
       "MCROSS",
       "ipfs://QmYuooZLrfDFY1P5CSfpr5SCj2UiLejdLpJUtfxsS87L9T/",
       "0xbc6fcce7c5487d43830a219ca6e7b83238b41e71"
@@ -18,7 +18,7 @@ describe("MCOSS COLLECTION", () => {
   });
 
   it("Should initialize the MCrossCollection contract", async () => {
-    expect(await MCOSSContract.name()).to.equal("MCOSS COLLECTION");
+    expect(await MCOSSContract.name()).to.equal("MCROSS COLLECTION");
   });
 
   it("Should mint a MCROSS", async () => {
@@ -61,7 +61,7 @@ describe("MCOSS COLLECTION", () => {
     ).to.be.revertedWith("Transaction reverted without a reason string");
   });
 
-  it("Should mint fail if mint amount > 5", async () => {
+  it("Should mint fail if mint amount > 5 NFTs", async () => {
     const Price = await MCOSSContract.cost();
     const totalPrice = ethers.utils.parseEther(
       (ethers.utils.formatEther(Price) * 5).toString()

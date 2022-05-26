@@ -10,10 +10,16 @@
   },
   "dependencies": {
     "@axelar-network/axelar-local-dev": "github:axelarnetwork/axelar-local-dev",
+    "@axelar-network/axelar-cgp-solidity": "3.2.1",
     "@openzeppelin/contracts": "^4.6.0",
     "do": "^0.6.2",
     "dotenv": "^16.0.1",
     "hardhat-abi-exporter": "^2.9.0",
     "hardhat-gas-reporter": "^1.0.8"
+  },
+  "scripts": {
+    "test": "hardhat test --network localhost",
+    "test-hardhat": "hardhat test --network hardhat",
+    "test-net": "hardhat test --network ropsten"
   }
 }
