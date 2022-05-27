@@ -2,6 +2,7 @@
   "name": "hardhat-project",
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.0.5",
+    "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
     "chai": "^4.3.6",
     "ethereum-waffle": "^3.4.4",
@@ -9,8 +10,8 @@
     "hardhat": "^2.9.3"
   },
   "dependencies": {
-    "@axelar-network/axelar-local-dev": "github:axelarnetwork/axelar-local-dev",
     "@axelar-network/axelar-cgp-solidity": "3.2.1",
+    "@axelar-network/axelar-local-dev": "github:axelarnetwork/axelar-local-dev",
     "@openzeppelin/contracts": "^4.6.0",
     "do": "^0.6.2",
     "dotenv": "^16.0.1",
@@ -20,6 +21,11 @@
   "scripts": {
     "test": "hardhat test --network localhost",
     "test-hardhat": "hardhat test --network hardhat",
-    "test-net": "hardhat test --network ropsten"
+    "test-net": "hardhat test --network ropsten",
+    "deploy:hh": "npx hardhat run --network hardhat scripts/*.js",
+    "deploy:rinkeby": "npx hardhat run --network rinkeby scripts/*.js",
+    "deploy:ropsten": "npx hardhat run --network ropsten scripts/*.js",
+    "deploy:kovan": "npx hardhat run --network kovan scripts/*.js",
+    "deploy:goerli": "npx hardhat run --network goerli scripts/*.js"
   }
 }
