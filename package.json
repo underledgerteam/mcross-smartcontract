@@ -26,6 +26,8 @@
     "deploy:rinkeby": "npx hardhat run --network rinkeby scripts/*.js",
     "deploy:ropsten": "npx hardhat run --network ropsten scripts/*.js",
     "deploy:kovan": "npx hardhat run --network kovan scripts/*.js",
-    "deploy:goerli": "npx hardhat run --network goerli scripts/*.js"
+    "deploy:goerli": "npx hardhat run --network goerli scripts/*.js",
+    "deploy:fuji": "npx hardhat run --network fuji scripts/*.js",
+    "deploy:mumbai": "npx hardhat run --network mumbai scripts/*.js"
   }
 }

@@ -5,29 +5,25 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import {IAxelarExecutable} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarExecutable.sol";
 
-contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
+contract MCrossCollection is ERC721Enumerable, Ownable {
     using Strings for uint256;
 
-    string public baseURI;
+    string public baseURI =
+        "ipfs://QmYuooZLrfDFY1P5CSfpr5SCj2UiLejdLpJUtfxsS87L9T/";
     string public baseExtension = ".json";
     uint256 public cost = 0.02 ether;
     uint256 public maxSupply = 1000;
     uint256 public maxMintAmount = 5;
     bool public paused = false;
     address wethAddress = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
-    mapping(address => uint256) private userRefund;
     uint256 balanceWETH;
     address Owner;
 
-    constructor(
-        string memory _name,
-        string memory _symbol,
-        string memory _initBaseURI,
-        address gateway
-    ) ERC721(_name, _symbol) IAxelarExecutable(gateway) {
-        setBaseURI(_initBaseURI);
+    mapping(address => uint256) private userRefund;
+    mapping(address => bool) private addressCanMint;
+
+    constructor() ERC721("MCROSS COLLECTION", "MCROSS NFT") {
         Owner = msg.sender;
     }
 
@@ -36,7 +32,7 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         return baseURI;
     }
 
-    // public
+    // external
     function mint(uint256 _mintAmount) external payable {
         uint256 supply = totalSupply();
         require(!paused);
@@ -53,28 +49,23 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         }
     }
 
-    function _executeWithToken(
-        string memory,
-        string memory,
-        bytes calldata payload,
-        string memory,
-        uint256 amount
-    ) internal virtual override {
-        address buyer;
-        uint256 _mintAmount;
-
-        (buyer, _mintAmount) = abi.decode(payload, (address, uint256));
+    function crossMint(
+        address _minter,
+        uint256 _mintAmount,
+        address _caller,
+        uint256 _amount
+    ) external {
+        require(addressCanMint[_caller], "Caller can not Mint NFT");
+        IERC20(wethAddress).transferFrom(msg.sender, address(this), _amount);
         uint256 supply = totalSupply();
 
-        require(!paused);
-
         if (supply + _mintAmount <= maxSupply) {
-            balanceWETH += amount;
+            balanceWETH += _amount;
             for (uint256 i = 1; i <= _mintAmount; i++) {
-                _safeMint(buyer, supply + i);
+                _safeMint(_minter, supply + i);
             }
         } else {
-            userRefund[buyer] += amount;
+            userRefund[_minter] += _amount;
         }
     }
 
@@ -82,6 +73,33 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         require(userRefund[msg.sender] > 0);
         payable(msg.sender).transfer(userRefund[msg.sender]);
         userRefund[msg.sender] = 0;
+    }
+
+    //only owner
+    function setCost(uint256 _newCost) external onlyOwner {
+        cost = _newCost;
+    }
+
+    function setmaxMintAmount(uint256 _newmaxMintAmount) external onlyOwner {
+        maxMintAmount = _newmaxMintAmount;
+    }
+
+    function withdraw() external onlyOwner {
+        payable(msg.sender).transfer(address(this).balance);
+    }
+
+    function setWETHAddress(address _newAddress) external onlyOwner {
+        wethAddress = _newAddress;
+    }
+
+    function withdrawWETH() external onlyOwner {
+        IERC20(wethAddress).transfer(Owner, balanceWETH);
+    }
+
+    //Public Function
+
+    function setAddressCanMint(address _address) public {
+        addressCanMint[_address] = true;
     }
 
     function walletOfOwner(address _owner)
@@ -122,19 +140,6 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
                 : "";
     }
 
-    //only owner
-    function setCost(uint256 _newCost) external onlyOwner {
-        cost = _newCost;
-    }
-
-    function setmaxMintAmount(uint256 _newmaxMintAmount) external onlyOwner {
-        maxMintAmount = _newmaxMintAmount;
-    }
-
-    function setBaseURI(string memory _newBaseURI) public onlyOwner {
-        baseURI = _newBaseURI;
-    }
-
     function setBaseExtension(string memory _newBaseExtension)
         public
         onlyOwner
@@ -146,15 +151,7 @@ contract MCrossCollection is ERC721Enumerable, Ownable, IAxelarExecutable {
         paused = _state;
     }
 
-    function withdraw() external onlyOwner {
-        payable(msg.sender).transfer(address(this).balance);
-    }
-
-    function setWETHAddress(address _newAddress) external onlyOwner {
-        wethAddress = _newAddress;
-    }
-
-    function withdrawWETH() external onlyOwner {
-        IERC20(wethAddress).transfer(Owner, balanceWETH);
+    function setBaseURI(string memory _newBaseURI) public onlyOwner {
+        baseURI = _newBaseURI;
     }
 }
