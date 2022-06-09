@@ -142,7 +142,7 @@ contract MCrossMarketplaceETH is Ownable {
 
         require(msg.sender != item.owner, "buy own item not allow");
         require(item.status == ListingStatus.Active, "item status is not active");
-        require(msg.value == item.price, "Invalid price");
+        require(msg.value >= item.price, "Invalid price");
 
         IERC721(nftContract).transferFrom(address(this), msg.sender, item.tokenId);
 
