@@ -2,8 +2,8 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MCrossMarketplaceETH is Ownable {
     enum ListingStatus {
@@ -12,12 +12,16 @@ contract MCrossMarketplaceETH is Ownable {
 		Cancelled
 	}
 
-    address private nftContract;
-    address private creatorWallet;
+    address nftContract;
+    address creatorWallet;
 
-    uint256 private itemCount = 0;
-    uint256 private rateServiceFee = 3;
-    uint256 private rateCreatorFee = 10;
+    uint256 itemCount = 0;
+    uint256 rateServiceFee = 3;
+    uint256 rateCreatorFee = 10;
+
+    uint256 creatorFee;
+    uint256 sellerRecieve;
+    uint256 serviceFee;
 
     struct MarketItem {
         address nftContract;
@@ -27,9 +31,7 @@ contract MCrossMarketplaceETH is Ownable {
         ListingStatus status;
     }
 
-    // List of all market items 
 	uint256[] private marketitems;
-    // Mapping between token id and their struct
     mapping(uint256 => MarketItem) private tokenIdMarketItems;
 
     event List(
@@ -63,7 +65,7 @@ contract MCrossMarketplaceETH is Ownable {
     }
 
     function listItems(uint _tokenId, uint256 price) external {
-        require(price > 0, "price must be at least 1 wei");
+        require(price > 1, "price must be at least 1 WEI");
         require(_tokenId > 0, "token id must greater than 0");
 
         MarketItem memory item = tokenIdMarketItems[_tokenId];
@@ -130,10 +132,11 @@ contract MCrossMarketplaceETH is Ownable {
     }
 
     function calculateItemFee(uint256 price) public view returns(uint256, uint256) {
-        uint256 serviceFee = price * rateServiceFee / 100;
-        uint256 creatorFee = (price - serviceFee) * rateCreatorFee / 100;
-        uint256 sellerRecieve = price - serviceFee - creatorFee;
-        return (creatorFee, sellerRecieve);
+        uint _serviceFee = price * rateServiceFee / 100;
+        uint _creatorFee = (price - _serviceFee) * rateCreatorFee / 100;
+        uint _sellerRecieve = price - _serviceFee - _creatorFee;
+
+        return (_creatorFee, _sellerRecieve);
     }
 
     function buyMarketItem(uint _tokenId) external payable {
@@ -142,11 +145,11 @@ contract MCrossMarketplaceETH is Ownable {
 
         require(msg.sender != item.owner, "buy own item not allow");
         require(item.status == ListingStatus.Active, "item status is not active");
-        require(msg.value >= item.price, "Invalid price");
+        require(msg.value == item.price, "Invalid price");
 
         IERC721(nftContract).transferFrom(address(this), msg.sender, item.tokenId);
 
-        (uint256 creatorFee, uint256 sellerRecieve) = calculateItemFee(item.price);
+        (creatorFee, sellerRecieve) = calculateItemFee(item.price);
 
         payable(creatorWallet).transfer(creatorFee);
         payable(item.owner).transfer(sellerRecieve);
