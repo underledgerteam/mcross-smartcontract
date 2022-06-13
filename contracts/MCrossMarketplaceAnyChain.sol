@@ -15,12 +15,16 @@ contract MCrossMarketplace is Ownable {
 		Cancelled
 	}
 
-    address private nftContract;
-    address private creatorWallet;
+    address nftContract;
+    address creatorWallet;
 
-    uint256 private itemCount = 0;
-    uint256 private rateServiceFee = 3;
-    uint256 private rateCreatorFee = 10;
+    uint256 itemCount = 0;
+    uint256 rateServiceFee = 3;
+    uint256 rateCreatorFee = 10;
+
+    uint256 creatorFee;
+    uint256 sellerRecieve;
+    uint256 serviceFee;
 
     struct MarketItem {
         address nftContract;
@@ -135,10 +139,11 @@ contract MCrossMarketplace is Ownable {
     }
 
     function calculateItemFee(uint256 price) public view returns(uint256, uint256) {
-        uint256 serviceFee = price * rateServiceFee / 100;
-        uint256 creatorFee = (price - serviceFee) * rateCreatorFee / 100;
-        uint256 sellerRecieve = price - serviceFee - creatorFee;
-        return (creatorFee, sellerRecieve);
+        uint _serviceFee = price * rateServiceFee / 100;
+        uint _creatorFee = (price - _serviceFee) * rateCreatorFee / 100;
+        uint _sellerRecieve = price - _serviceFee - _creatorFee;
+
+        return (_creatorFee, _sellerRecieve);
     }
 
     function buyMarketItem(uint _tokenId) external payable {
@@ -153,7 +158,7 @@ contract MCrossMarketplace is Ownable {
 
         IERC721(nftContract).transferFrom(address(this), msg.sender, item.tokenId);
 
-        (uint256 creatorFee, uint256 sellerRecieve) = calculateItemFee(item.price);
+        (creatorFee, sellerRecieve) = calculateItemFee(item.price);
         
         token.transferFrom(msg.sender, creatorWallet, creatorFee);
         token.transferFrom(msg.sender, item.owner, sellerRecieve);
