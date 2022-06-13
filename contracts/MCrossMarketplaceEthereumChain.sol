@@ -147,15 +147,12 @@ contract MCrossMarketplaceETH is Ownable {
         require(item.status == ListingStatus.Active, "item status is not active");
         require(msg.value == item.price, "Invalid price");
 
-        IERC721(nftContract).transferFrom(address(this), msg.sender, item.tokenId);
+        IERC721(nftContract).safeTransferFrom(address(this), msg.sender, item.tokenId);
 
         (creatorFee, sellerRecieve) = calculateItemFee(item.price);
 
         payable(creatorWallet).transfer(creatorFee);
         payable(item.owner).transfer(sellerRecieve);
-
-        tokenIdMarketItems[_tokenId].status = ListingStatus.Sold;
-        tokenIdMarketItems[_tokenId].owner = item.owner;
 
         emit Sale(
             item.nftContract,
@@ -165,6 +162,9 @@ contract MCrossMarketplaceETH is Ownable {
             item.price,
             item.status
         );
+
+        tokenIdMarketItems[_tokenId].status = ListingStatus.Sold;
+        tokenIdMarketItems[_tokenId].owner = msg.sender;
     }
 
     function withdraw() external onlyOwner {

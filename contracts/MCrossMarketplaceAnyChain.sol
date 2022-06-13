@@ -2,7 +2,6 @@
 pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
@@ -34,9 +33,7 @@ contract MCrossMarketplace is Ownable {
         ListingStatus status;
     }
 
-    // List of all market items 
 	uint256[] private marketitems;
-    // Mapping between token id and their struct
     mapping(uint256 => MarketItem) private tokenIdMarketItems;
 
     event List(
@@ -146,7 +143,7 @@ contract MCrossMarketplace is Ownable {
         return (_creatorFee, _sellerRecieve);
     }
 
-    function buyMarketItem(uint _tokenId) external payable {
+     function buyMarketItem(uint _tokenId) external payable {
         require(tokenIdMarketItems[_tokenId].tokenId > 0, "item not exists");
         MarketItem storage item = tokenIdMarketItems[_tokenId];
 
@@ -154,9 +151,7 @@ contract MCrossMarketplace is Ownable {
         require(item.status == ListingStatus.Active, "item status is not active");
         require(item.price <= token.balanceOf(msg.sender), "balance is low");
 
-        tokenIdMarketItems[_tokenId].status = ListingStatus.Sold;
-
-        IERC721(nftContract).transferFrom(address(this), msg.sender, item.tokenId);
+        IERC721(nftContract).safeTransferFrom(address(this), msg.sender, item.tokenId);
 
         (creatorFee, sellerRecieve) = calculateItemFee(item.price);
         
@@ -171,6 +166,9 @@ contract MCrossMarketplace is Ownable {
             item.price,
             item.status
         );
+
+        tokenIdMarketItems[_tokenId].status = ListingStatus.Sold;
+        tokenIdMarketItems[_tokenId].owner = msg.sender;
     }
 
     function withdraw() external onlyOwner {
