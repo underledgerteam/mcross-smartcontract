@@ -181,9 +181,10 @@ contract MCrossMarketplace is Ownable {
             
             MarketItem memory item = tokenIdMarketItems[_tokenId];
 
-            tokenIdMarketItems[_tokenId].status = ListingStatus.Cancelled;
-
-            IERC721(nftContract).safeTransferFrom(address(this), item.owner, _tokenId);
+            if(item.status == ListingStatus.Active) {
+                tokenIdMarketItems[_tokenId].status = ListingStatus.Cancelled;
+                IERC721(nftContract).safeTransferFrom(address(this), item.owner, _tokenId);
+            }
         }
     }
 
