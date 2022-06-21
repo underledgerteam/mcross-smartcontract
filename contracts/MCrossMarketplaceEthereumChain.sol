@@ -14,6 +14,7 @@ contract MCrossMarketplaceETH is Ownable {
 
     address nftContract;
     address creatorWallet;
+    address serviceWallet;
 
     uint256 itemCount = 0;
     uint256 rateServiceFee = 3;
@@ -58,10 +59,12 @@ contract MCrossMarketplaceETH is Ownable {
 
     constructor(
         address _nftContract,
-        address _creatorWallet
+        address _creatorWallet,
+        address _serviceWallet
     ){
         nftContract = _nftContract;
         creatorWallet = _creatorWallet;
+        serviceWallet = _serviceWallet;
     }
 
     function listItems(uint _tokenId, uint256 price) external {
@@ -131,12 +134,12 @@ contract MCrossMarketplaceETH is Ownable {
         emit Cancel (_tokenId, item.owner);
     }
 
-    function calculateItemFee(uint256 price) public view returns(uint256, uint256) {
+    function calculateItemFee(uint256 price) public view returns(uint256, uint256, uint256) {
         uint _serviceFee = price * rateServiceFee / 100;
         uint _creatorFee = (price - _serviceFee) * rateCreatorFee / 100;
         uint _sellerRecieve = price - _serviceFee - _creatorFee;
 
-        return (_creatorFee, _sellerRecieve);
+        return (_serviceFee, _creatorFee, _sellerRecieve);
     }
 
     function buyMarketItem(uint _tokenId) external payable {
@@ -151,6 +154,7 @@ contract MCrossMarketplaceETH is Ownable {
 
         (creatorFee, sellerRecieve) = calculateItemFee(item.price);
 
+        payable(serviceWallet).transfer(serviceFee);
         payable(creatorWallet).transfer(creatorFee);
         payable(item.owner).transfer(sellerRecieve);
 
