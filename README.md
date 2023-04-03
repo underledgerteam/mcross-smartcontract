@@ -14,6 +14,19 @@ node scripts/sample-script.js
 npx hardhat help
 ```
 
+## Axelar Contract Address
+
+| Chain | Gatewat Contract | Gas Service Contract | WETH |
+|---|---|---|---|
+| Ethereum Goerli | 0xe432150cce91c13a887f7D836923d5597adD8E31 | 0xbE406F0189A0B4cf3A05C286473D23791Dd44Cc6 | 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6 |
+| Mumbai | 0xBF62ef1486468a6bd26Dd669C06db43dEd5B849B | 0xbE406F0189A0B4cf3A05C286473D23791Dd44Cc6 | 0xfba15fFF35558fE2A469B96A90AeD7727FE38fAE |
+| Avalance Fuji | 0xC249632c2D40b9001FE907806902f63038B737Ab | 0xbE406F0189A0B4cf3A05C286473D23791Dd44Cc6 | 0x3613C187b3eF813619A25322595bA5E297E4C08a
+|
+
+source: https://docs.axelar.dev/dev/reference/testnet-contract-addresses
+
+<br>
+
 # How to deploy smart contract
 ### Source Chain
 
@@ -103,4 +116,3 @@ main()
     process.exit(1);
   });
 ```
-
