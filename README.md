@@ -48,7 +48,7 @@ npx hardhat help
   npx hardhat verify --network fuji "YOUR CONTRACT ADDRESS MCrossBridgeNFTController"
   npx hardhat verify --network fuji "YOUR CONTRACT ADDRESS MCrossBrdigeNFT"  "CONTRACT ADDRESS AxelarExecutable" "CONTRACT ADDRESS AxelarGasReceiver" "CONTRACT ADDRESS MCrossBridgeNFTController"
 ```
-### PS. In the file Deploy.js Assume if you want to deploy to Avalanche Testnet you must be enabled only the bridge Contract of Fuji. You must follow this example
+### PS. In the file Deploy.js Assume if you want to deploy to Avalanche Testnet you must be enabled only the MCrossBrdigeNFT of Fuji. You must follow this example
 
 ```javaScript
   async function main() {
