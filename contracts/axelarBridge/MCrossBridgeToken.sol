@@ -3,14 +3,14 @@
 pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IAxelarGateway} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarGateway.sol";
-import {IAxelarGasReceiver} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarGasReceiver.sol";
+import { IAxelarGateway } from "@axelar-network/axelar-cgp-solidity/contracts/interfaces/IAxelarGateway.sol";
+import { IAxelarGasService } from "@axelar-network/axelar-cgp-solidity/contracts/interfaces/IAxelarGasService.sol";
 
 import "./IMCrossBridgeToken.sol";
 
 contract MCrossBridgeToken is Ownable, IMCrossBridgeToken {
     IAxelarGateway axelarGateway;
-    IAxelarGasReceiver gasReceiver;
+    IAxelarGasService gasService;
     address public WETH;
 
     mapping(string => string) public destinaionChain;
@@ -18,11 +18,11 @@ contract MCrossBridgeToken is Ownable, IMCrossBridgeToken {
     constructor(
         address _weth,
         address _gateway,
-        address _gasReceiver,
+        address _gasService,
         address _controller
     ) IMCrossBridgeToken(_controller) {
         axelarGateway = IAxelarGateway(_gateway);
-        gasReceiver = IAxelarGasReceiver(_gasReceiver);
+        gasService = IAxelarGasService(_gasService);
         WETH = _weth;
     }
 
@@ -62,9 +62,9 @@ contract MCrossBridgeToken is Ownable, IMCrossBridgeToken {
 
         IERC20(WETH).transferFrom(msg.sender, address(this), amount);
         IERC20(WETH).approve(address(axelarGateway), amount);
-        IERC20(WETH).approve(address(gasReceiver), amount);
+        IERC20(WETH).approve(address(gasService), amount);
 
-        gasReceiver.payNativeGasForContractCallWithToken{value: msg.value}(
+        gasService.payNativeGasForContractCallWithToken{value: msg.value}(
             address(this),
             _destinationChain,
             destinaionChain[_destinationChain],

@@ -10,9 +10,9 @@
     "hardhat": "^2.9.3"
   },
   "dependencies": {
-    "@axelar-network/axelar-cgp-solidity": "3.2.1",
-    "@axelar-network/axelar-local-dev": "github:axelarnetwork/axelar-local-dev",
-    "@openzeppelin/contracts": "^4.6.0",
+    "@axelar-network/axelar-cgp-solidity": "4.5.0",
+    "@axelar-network/axelar-local-dev": "1.4.2",
+    "@openzeppelin/contracts": "4.8.2",
     "do": "^0.6.2",
     "dotenv": "^16.0.1",
     "hardhat-abi-exporter": "^2.9.0",

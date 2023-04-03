@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: Unlicense
 
 pragma solidity ^0.8.9;
-import {IAxelarExecutable} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarExecutable.sol";
-import {IAxelarGasReceiver} from "@axelar-network/axelar-cgp-solidity/src/interfaces/IAxelarGasReceiver.sol";
+import { IAxelarExecutable } from "@axelar-network/axelar-cgp-solidity/contracts/interfaces/IAxelarExecutable.sol";
+import { IAxelarGasService } from "@axelar-network/axelar-cgp-solidity/contracts/interfaces/IAxelarGasService.sol";
 import "./IMCrossBridgeNFT.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MCrossBrdigeNFT is IAxelarExecutable, Ownable, IMCrossBridgeNFT {
-    IAxelarGasReceiver public immutable gasReceiver;
+    IAxelarGasService public immutable gasService;
 
     struct SiblingData {
         uint128 chainId;
@@ -20,10 +20,10 @@ contract MCrossBrdigeNFT is IAxelarExecutable, Ownable, IMCrossBridgeNFT {
 
     constructor(
         address _gateway,
-        address _gasReceiver,
+        address _gasService,
         address _controller
     ) IAxelarExecutable(_gateway) IMCrossBridgeNFT(_controller) {
-        gasReceiver = IAxelarGasReceiver(_gasReceiver);
+        gasService = IAxelarGasService(_gasService);
     }
 
     function addLinker(string memory chain, string memory linker)
@@ -46,13 +46,12 @@ contract MCrossBrdigeNFT is IAxelarExecutable, Ownable, IMCrossBridgeNFT {
     }
 
     function _bridgeAxelar(
-        uint128 chainId,
         address from,
         string memory destinationChain,
         string memory destinationAddress,
         bytes calldata payload
     ) internal {
-        gasReceiver.payNativeGasForContractCall{value: msg.value}(
+        gasService.payNativeGasForContractCall{value: msg.value}(
             address(this),
             destinationChain,
             destinationAddress,
@@ -70,7 +69,6 @@ contract MCrossBrdigeNFT is IAxelarExecutable, Ownable, IMCrossBridgeNFT {
     ) internal override {
         require(msg.sender == address(controller), "Only Controller Call");
         _bridgeAxelar(
-            chainId,
             from,
             siblings[chainId].chainName,
             siblings[chainId].bridgeAddress,

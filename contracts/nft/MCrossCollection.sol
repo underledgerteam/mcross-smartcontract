@@ -16,7 +16,7 @@ contract MCrossCollection is ERC721Enumerable, Ownable {
     uint256 public maxSupply = 1000;
     uint256 public maxMintAmount = 5;
     bool public paused = false;
-    address wethAddress = 0xc778417E063141139Fce010982780140Aa0cD5Ab;
+    address wethAddress = 0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6; // Goerli WETH address
     uint256 balanceWETH;
     address Owner;
 
