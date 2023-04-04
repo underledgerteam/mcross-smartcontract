@@ -19,24 +19,32 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 
-const { PRIVATE_KEY, API_KEY_ROPSTEN } = process.env;
+const {
+  PRIVATE_KEY,
+  GOERLI_URL,
+  MUMBAI_URL,
+  FUJI_URL,
+  GOERLI_SCAN_API_KEY,
+  MUMBAI_SCAN_API_KEY,
+  FUJI_SCAN_API_KEY,
+} = process.env;
 
 module.exports = {
-  defaultNetwork: "ropsten",
+  defaultNetwork: "goerli",
   networks: {
     hardhat: {},
-    ropsten: {
-      url: `https://ropsten.infura.io/v3/${API_KEY_ROPSTEN}`,
+    goerli: {
+      url: GOERLI_URL,
       accounts: [PRIVATE_KEY],
-      chainId: 3,
+      chainId: 5,
     },
     fuji: {
-      url: `https://api.avax-test.network/ext/bc/C/rpc`,
+      url: FUJI_URL,
       accounts: [PRIVATE_KEY],
       chainId: 43113,
     },
     mumbai: {
-      url: `https://matic-mumbai.chainstacklabs.com`,
+      url: MUMBAI_URL,
       accounts: [PRIVATE_KEY],
       chainId: 80001,
     },
@@ -45,10 +53,9 @@ module.exports = {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
     apiKey: {
-      ropsten: "QPNAACHSCIVH9WXF2ZSQ5UUX6HFMJ3ZRUR",
-      rinkeby: "J7EZKJ8CMAIYEV8BVQZTF5Y5C9813X6U4C",
-      polygonMumbai: "2S8PS4TS3163CEPNQWWT2PU1CAJIV9FFRM",
-      avalancheFujiTestnet: "1AIWJPNBVABF512QFHNUDN9726TU2168FT",
+      goerli: GOERLI_SCAN_API_KEY,
+      polygonMumbai: MUMBAI_SCAN_API_KEY,
+      avalancheFujiTestnet: FUJI_SCAN_API_KEY,
     },
   },
   solidity: {
