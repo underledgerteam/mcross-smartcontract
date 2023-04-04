@@ -32,12 +32,12 @@ async function main() {
     const MCrossReceiveToken = await ethers.getContractFactory(
         "MCrossReceiveToken"
     );
-    const receiveToken = await MCrossReceiveToken.deploy();
-    await receiveToken.deployed(
+    const receiveToken = await MCrossReceiveToken.deploy(
         wethAddress,
         axelarGatewayAddress,
         bridgeNFTContract.address
     );
+    await receiveToken.deployed();
 
     console.log("MCrossBridgeNFTController deployed to: ", controllerContract.address);
     console.log("MCrossBrdigeNFT deployed to: ", bridgeNFTContract.address);
