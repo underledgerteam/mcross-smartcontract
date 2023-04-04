@@ -8,11 +8,11 @@ async function main() {
     const MarketplaceEthereum = await ethers.getContractFactory(
         "MCrossMarketplaceETH"
     );
-    const marketplaceEthereum = await MarketplaceEthereum.deploy();
-    await marketplaceEthereum.deployed(
+    const marketplaceEthereum = await MarketplaceEthereum.deploy(
         nftContractAddress,
         creatorWalletAddress
     );
+    await marketplaceEthereum.deployed();
 
     console.log("MarketplaceEthereum deployed to: ", marketplaceEthereum.address);
 }

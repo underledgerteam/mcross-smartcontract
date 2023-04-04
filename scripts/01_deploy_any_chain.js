@@ -16,8 +16,8 @@ async function main() {
     const MCrossMintController = await ethers.getContractFactory(
         "MCrossMintController"
     );
-    const mintController = await MCrossMintController.deploy();
-    await mintController.deployed(wethAddress);
+    const mintController = await MCrossMintController.deploy(wethAddress);
+    await mintController.deployed();
 
     // Bridge NFT (Axelar)
     const MCrossBrdigeNFT = await await ethers.getContractFactory(
@@ -34,13 +34,13 @@ async function main() {
     const MCrossBridgeToken = await ethers.getContractFactory(
         "MCrossBridgeToken"
     );
-    const bridgeTokenContract = await MCrossBridgeToken.deploy();
-    await bridgeTokenContract.deployed(
+    const bridgeTokenContract = await MCrossBridgeToken.deploy(
         wethAddress,
         axelarGatewayAddress,
         axelarGasServiceAddress,
         controllerContract.address
     );
+    await bridgeTokenContract.deployed();
 
     // Mock NFT
     const MockCollection = await ethers.getContractFactory("MockCollection");
